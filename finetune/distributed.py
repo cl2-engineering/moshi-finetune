@@ -21,13 +21,17 @@ def get_world_size() -> int:
     return dist.get_world_size()
 
 
-def visible_devices() -> List[int]:
-    return [int(d) for d in os.environ["CUDA_VISIBLE_DEVICES"].split(",")]
+def visible_devices() -> List[str]:
+    # Entries can be indices or GPU UUIDs. If unset, all GPUs are visible.
+    env = os.environ.get("CUDA_VISIBLE_DEVICES")
+    if env is None:
+        return [str(i) for i in range(torch.cuda.device_count())]
+    return [d for d in env.split(",") if d]
 
 
 def set_device():
     logger.info(f"torch.cuda.device_count: {torch.cuda.device_count()}")
-    logger.info(f"CUDA_VISIBLE_DEVICES: {os.environ['CUDA_VISIBLE_DEVICES']}")
+    logger.info(f"CUDA_VISIBLE_DEVICES: {os.environ.get('CUDA_VISIBLE_DEVICES')}")
     logger.info(f"local rank: {int(os.environ['LOCAL_RANK'])}")
 
     assert torch.cuda.is_available()
