@@ -11,17 +11,16 @@ dependencies = [
   "safetensors",
   "tensorboard",
   "tqdm",
-  "torch==2.6",
-  "triton>=3.2",
+  "torch>=2.9,<2.10",
   # "git+https://git@github.com/kyutai-labs/moshi.git#egg=moshi&subdirectory=moshi",
   # We could also use [tool.uv.sources] to point to the git repo, but this maintains
   # compatibility with `pip install -e .`
   "moshi @ git+https://github.com/kyutai-labs/moshi.git#subdirectory=moshi",
-  "sphn==0.1.12",
+  "sphn>=0.2,<0.3",
   "auditok==0.2",
   "whisper_timestamped",
   "huggingface_hub",
-  "torchaudio",
+  "torchaudio>=2.9,<2.10",
   "submitit",
   "llvmlite>=0.44",
   "numba>=0.61",
@@ -44,6 +43,21 @@ dev = [
 # The following fixes Pylance/VSCode not seeing the `finetune` package. See
 # https://github.com/astral-sh/uv/issues/3898
 config-settings = { editable_mode = "compat" }
+# Make sure the lock resolves to versions with wheels for both x86_64 and aarch64 Linux.
+required-environments = [
+  "sys_platform == 'linux' and platform_machine == 'x86_64'",
+  "sys_platform == 'linux' and platform_machine == 'aarch64'",
+]
+
+# CUDA 13.0 builds of torch/torchaudio (include aarch64 wheels, e.g. DGX Spark / GB10).
+[tool.uv.sources]
+torch = { index = "pytorch-cu130" }
+torchaudio = { index = "pytorch-cu130" }
+
+[[tool.uv.index]]
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true
 
 [tool.setuptools]
 packages = ["finetune"]
